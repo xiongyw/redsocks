@@ -18,7 +18,7 @@ void _log_vwrite(const char *file, int line, const char *func, int do_errno, int
 
 void _log_write(const char *file, int line, const char *func, int do_errno, int priority, const char *fmt, ...)
 #if defined(__GNUC__)
-	__attribute__ (( format (printf, 6, 7) ))
+__attribute__ (( format (printf, 6, 7) ))
 #endif
 ;
 

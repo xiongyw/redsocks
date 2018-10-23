@@ -47,8 +47,8 @@ static inline void INIT_LIST_HEAD(struct list_head_t *list)
  * the prev/next entries already!
  */
 static inline void __list_add(struct list_head_t *new,
-			      struct list_head_t *prev,
-			      struct list_head_t *next)
+                              struct list_head_t *prev,
+                              struct list_head_t *next)
 {
 	next->prev = new;
 	new->next = next;
@@ -115,7 +115,7 @@ static inline void list_del(struct list_head_t *entry)
  * Note: if 'old' was empty, it will be overwritten.
  */
 static inline void list_replace(struct list_head_t *old,
-				struct list_head_t *new)
+                                struct list_head_t *new)
 {
 	new->next = old->next;
 	new->next->prev = new;
@@ -124,7 +124,7 @@ static inline void list_replace(struct list_head_t *old,
 }
 
 static inline void list_replace_init(struct list_head_t *old,
-					struct list_head_t *new)
+                                     struct list_head_t *new)
 {
 	list_replace(old, new);
 	INIT_LIST_HEAD(old);
@@ -147,8 +147,8 @@ static inline void list_del_init(struct list_head_t *entry)
  */
 static inline void list_move(struct list_head_t *list, struct list_head_t *head)
 {
-        __list_del(list->prev, list->next);
-        list_add(list, head);
+	__list_del(list->prev, list->next);
+	list_add(list, head);
 }
 
 /**
@@ -157,10 +157,10 @@ static inline void list_move(struct list_head_t *list, struct list_head_t *head)
  * @head: the head that will follow our entry
  */
 static inline void list_move_tail(struct list_head_t *list,
-				  struct list_head_t *head)
+                                  struct list_head_t *head)
 {
-        __list_del(list->prev, list->next);
-        list_add_tail(list, head);
+	__list_del(list->prev, list->next);
+	list_add_tail(list, head);
 }
 
 /**
@@ -169,7 +169,7 @@ static inline void list_move_tail(struct list_head_t *list,
  * @head: the head of the list
  */
 static inline int list_is_last(const struct list_head_t *list,
-				const struct list_head_t *head)
+                               const struct list_head_t *head)
 {
 	return list->next == head;
 }
@@ -203,7 +203,7 @@ static inline int list_empty_careful(const struct list_head_t *head)
 }
 
 static inline void __list_splice(struct list_head_t *list,
-				 struct list_head_t *head)
+                                 struct list_head_t *head)
 {
 	struct list_head_t *first = list->next;
 	struct list_head_t *last = list->prev;
@@ -235,7 +235,7 @@ static inline void list_splice(struct list_head_t *list, struct list_head_t *hea
  * The list at @list is reinitialised
  */
 static inline void list_splice_init(struct list_head_t *list,
-				    struct list_head_t *head)
+                                    struct list_head_t *head)
 {
 	if (!list_empty(list)) {
 		__list_splice(list, head);

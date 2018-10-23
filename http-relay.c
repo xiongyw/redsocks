@@ -230,8 +230,7 @@ static void httpr_relay_read_cb(struct bufferevent *buffev, void *_arg)
 				}
 			}
 			free(line);
-		}
-		else if (len >= HTTP_HEAD_WM_HIGH) {
+		} else if (len >= HTTP_HEAD_WM_HIGH) {
 			redsocks_drop_client(client);
 			dropped = 1;
 		}
@@ -249,8 +248,7 @@ static void httpr_relay_read_cb(struct bufferevent *buffev, void *_arg)
 				client->state = httpr_headers_skipped;
 			}
 			free(line);
-		}
-		else {
+		} else {
 			break;
 		}
 	}
@@ -328,8 +326,8 @@ static void httpr_relay_write_cb(struct bufferevent *buffev, void *_arg)
 				snprintf(cnounce, sizeof(cnounce), "%08x%08x", red_randui32(), red_randui32());
 
 				auth_string = digest_authentication_encode(auth->last_auth_query + 7, //line
-						client->instance->config.login, client->instance->config.password, //user, pass
-						method, uri, auth->last_auth_count, cnounce); // method, path, nc, cnounce
+				              client->instance->config.login, client->instance->config.password, //user, pass
+				              method, uri, auth->last_auth_count, cnounce); // method, path, nc, cnounce
 
 				free(method);
 				free(uri);
@@ -389,10 +387,10 @@ static char *fmt_http_host(struct sockaddr_in addr)
 		return inet_ntoa(addr.sin_addr);
 	else {
 		snprintf(host, sizeof(host),
-				"%s:%u",
-				inet_ntoa(addr.sin_addr),
-				ntohs(addr.sin_port)
-				);
+		         "%s:%u",
+		         inet_ntoa(addr.sin_addr),
+		         ntohs(addr.sin_port)
+		        );
 		return host;
 	}
 }
@@ -504,8 +502,7 @@ static void httpr_client_read_cb(struct bufferevent *buffev, void *_arg)
 			if (!httpr->firstline) {
 				httpr->firstline = line;
 				line = 0;
-			}
-			else if (strncasecmp(line, "Host", 4) == 0) {
+			} else if (strncasecmp(line, "Host", 4) == 0) {
 				httpr->has_host = 1;
 				char *ptr = line + 5;
 				while (*ptr && isspace(*ptr))
@@ -517,8 +514,7 @@ static void httpr_client_read_cb(struct bufferevent *buffev, void *_arg)
 			else if (strncasecmp(line, "Connection", 10) == 0)
 				skip_line = 1;
 
-		}
-		else { // last line of request
+		} else { // last line of request
 			if (!httpr->firstline || httpr_toss_http_firstline(client) < 0)
 				do_drop = 1;
 
@@ -570,11 +566,10 @@ static int httpr_connect_relay(redsocks_client *client)
 		redsocks_log_errno(client, LOG_ERR, "bufferevent_enable");
 		redsocks_drop_client(client);
 	}
-    return error;
+	return error;
 }
 
-relay_subsys http_relay_subsys =
-{
+relay_subsys http_relay_subsys = {
 	.name                 = "http-relay",
 	.payload_len          = sizeof(httpr_client),
 	.instance_payload_len = sizeof(http_auth),

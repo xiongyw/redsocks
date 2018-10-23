@@ -34,7 +34,7 @@ void redsocks_relay_connected(struct bufferevent *buffev, void *_arg);
 
 static void direct_relay_init(redsocks_client *client)
 {
-    client->state = 0;
+	client->state = 0;
 }
 
 static void direct_relay_fini(redsocks_client *client)
@@ -43,48 +43,45 @@ static void direct_relay_fini(redsocks_client *client)
 
 static void direct_write_cb(struct bufferevent *buffev, void *_arg)
 {
-    redsocks_client *client = _arg;
-    redsocks_touch_client(client);
-    if (client->state == 0)
-    {
-        client->state = 1;
-        if (redsocks_start_relay(client))
-            // Failed to start relay. Connection is dropped.
-            return;
-        // Write any data received from client to relay
-        struct evbuffer * input = bufferevent_get_input(client->client);
-        if (evbuffer_get_length(input))
-            if (bufferevent_write_buffer(client->relay, input) == -1)
-                redsocks_log_errno(client, LOG_ERR, "bufferevent_write_buffer");
-    }
+	redsocks_client *client = _arg;
+	redsocks_touch_client(client);
+	if (client->state == 0) {
+		client->state = 1;
+		if (redsocks_start_relay(client))
+			// Failed to start relay. Connection is dropped.
+			return;
+		// Write any data received from client to relay
+		struct evbuffer * input = bufferevent_get_input(client->client);
+		if (evbuffer_get_length(input))
+			if (bufferevent_write_buffer(client->relay, input) == -1)
+				redsocks_log_errno(client, LOG_ERR, "bufferevent_write_buffer");
+	}
 }
 
 static int direct_connect_relay(redsocks_client *client)
 {
-    char * interface = client->instance->config.interface;
-    struct timeval tv = {client->instance->config.timeout, 0};
+	char * interface = client->instance->config.interface;
+	struct timeval tv = {client->instance->config.timeout, 0};
 
-    // Allowing binding relay socket to specified IP for outgoing connections
-    client->relay = red_connect_relay(interface, &client->destaddr, NULL,
-                         redsocks_relay_connected, redsocks_event_error, client, &tv);
-    if (!client->relay)
-    {
-        redsocks_log_errno(client, LOG_ERR, "red_connect_relay");
-        redsocks_drop_client(client);
-        return -1;
-    }
-    return 0;
+	// Allowing binding relay socket to specified IP for outgoing connections
+	client->relay = red_connect_relay(interface, &client->destaddr, NULL,
+	                                  redsocks_relay_connected, redsocks_event_error, client, &tv);
+	if (!client->relay) {
+		redsocks_log_errno(client, LOG_ERR, "red_connect_relay");
+		redsocks_drop_client(client);
+		return -1;
+	}
+	return 0;
 }
 
-relay_subsys direct_connect_subsys =
-{
-    .name                 = "direct",
-    .payload_len          = 0,
-    .instance_payload_len = 0,
-    .writecb = direct_write_cb,
-    .init                 = direct_relay_init,
-    .fini                 = direct_relay_fini,
-    .connect_relay = direct_connect_relay,
+relay_subsys direct_connect_subsys = {
+	.name                 = "direct",
+	.payload_len          = 0,
+	.instance_payload_len = 0,
+	.writecb = direct_write_cb,
+	.init                 = direct_relay_init,
+	.fini                 = direct_relay_fini,
+	.connect_relay = direct_connect_relay,
 };
 
 

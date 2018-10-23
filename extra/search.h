@@ -37,9 +37,9 @@ void insque(void *, void *);
 void remque(void *);
 
 void *lsearch(const void *, void *, size_t *, size_t,
-	int (*)(const void *, const void *));
+              int (*)(const void *, const void *));
 void *lfind(const void *, const void *, size_t *, size_t,
-	int (*)(const void *, const void *));
+            int (*)(const void *, const void *));
 
 void *tdelete(const void *__restrict, void **__restrict, int(*)(const void *, const void *));
 void *tfind(const void *, void *const *, int(*)(const void *, const void *));

@@ -74,26 +74,26 @@ typedef md_info_t digest_type_t;
 #define kCCContextInvalid -1
 
 typedef struct {
-    CCCryptorRef cryptor;
-    int valid;
-    CCOperation encrypt;
-    CCAlgorithm cipher;
-    CCMode mode;
-    CCPadding padding;
-    uint8_t iv[MAX_IV_LENGTH];
-    uint8_t key[MAX_KEY_LENGTH];
-    size_t iv_len;
-    size_t key_len;
+	CCCryptorRef cryptor;
+	int valid;
+	CCOperation encrypt;
+	CCAlgorithm cipher;
+	CCMode mode;
+	CCPadding padding;
+	uint8_t iv[MAX_IV_LENGTH];
+	uint8_t key[MAX_KEY_LENGTH];
+	size_t iv_len;
+	size_t key_len;
 } cipher_cc_t;
 
 #endif
 
 typedef struct {
-    cipher_evp_t evp;
+	cipher_evp_t evp;
 #ifdef USE_CRYPTO_APPLECC
-    cipher_cc_t cc;
+	cipher_cc_t cc;
 #endif
-    uint8_t iv[MAX_IV_LENGTH];
+	uint8_t iv[MAX_IV_LENGTH];
 } cipher_ctx_t;
 
 #ifdef HAVE_STDINT_H
@@ -127,19 +127,19 @@ typedef struct {
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 
 typedef struct enc_info_t {
-    int method;
-    uint8_t key[MAX_KEY_LENGTH];
-    int     key_len;
-    int     iv_len;
-    uint8_t *enc_table;
-    uint8_t *dec_table;
+	int method;
+	uint8_t key[MAX_KEY_LENGTH];
+	int     key_len;
+	int     iv_len;
+	uint8_t *enc_table;
+	uint8_t *dec_table;
 } enc_info;
 
 struct enc_ctx {
-    uint8_t init;
-    uint64_t counter;
-    cipher_ctx_t evp;
-    enc_info * info;
+	uint8_t init;
+	uint64_t counter;
+	cipher_ctx_t evp;
+	enc_info * info;
 };
 
 int enc_init(enc_info * info, const char *pass, const char *method);
@@ -147,9 +147,9 @@ void enc_free(enc_info * info);
 int enc_ctx_init(enc_info * info, struct enc_ctx *ctx, int enc);
 void enc_ctx_free(struct enc_ctx *ctx);
 int ss_encrypt(struct enc_ctx *ctx, char *plaintext, size_t plen,
-                  char * ciphertext, size_t * clen);
+               char * ciphertext, size_t * clen);
 int ss_decrypt(struct enc_ctx *ctx, char *ciphertext, size_t clen,
-                 char *plaintext, size_t *olen);
+               char *plaintext, size_t *olen);
 size_t ss_calc_buffer_size(struct enc_ctx *ctx, size_t ilen);
 
 #endif // _ENCRYPT_H

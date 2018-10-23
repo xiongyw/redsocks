@@ -44,7 +44,7 @@ void parser_add_section(parser_context *context, parser_section *section);
 int parser_run(parser_context *context);
 void parser_error(parser_context *context, const char *fmt, ...)
 #if defined(__GNUC__)
-	__attribute__ (( format (printf, 2, 3) ))
+__attribute__ (( format (printf, 2, 3) ))
 #endif
 ;
 void parser_stop(parser_context *context);

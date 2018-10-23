@@ -15,7 +15,7 @@
  *
  *
  * http-auth library, provide basic and digest scheme
- *	 see RFC 2617 for details 
+ *	 see RFC 2617 for details
  */
 
 #include <string.h>
@@ -48,7 +48,7 @@ char* basic_authentication_encode(const char *user, const char *passwd)
 
 #define MD5_HASHLEN (16)
 
-static void dump_hash(char *buf, const unsigned char *hash) 
+static void dump_hash(char *buf, const unsigned char *hash)
 {
 	int i;
 
@@ -73,27 +73,25 @@ static int extract_param(const char **source, param_token *name, param_token *va
 {
 	const char *p = *source;
 
-	while (isspace (*p)) 
+	while (isspace (*p))
 		++p;
 
-	if (!*p)
-	{
+	if (!*p) {
 		*source = p;
 		return 0;             /* no error; nothing more to extract */
 	}
 
 	/* Extract name. */
 	name->b = p;
-	while (*p && !isspace (*p) && *p != '=' && *p != separator) 
+	while (*p && !isspace (*p) && *p != '=' && *p != separator)
 		++p;
 	name->e = p;
 	if (name->b == name->e)
 		return 0;               /* empty name: error */
 
-	while (isspace (*p)) 
+	while (isspace (*p))
 		++p;
-	if (*p == separator || !*p)           /* no value */
-	{
+	if (*p == separator || !*p) {         /* no value */
 		value->b = value->e = "";
 		if (*p == separator) ++p;
 		*source = p;
@@ -105,8 +103,7 @@ static int extract_param(const char **source, param_token *name, param_token *va
 	/* *p is '=', extract value */
 	++p;
 	while (isspace (*p)) ++p;
-	if (*p == '"')                /* quoted */
-	{
+	if (*p == '"') {              /* quoted */
 		value->b = ++p;
 		while (*p && *p != '"') ++p;
 		if (!*p)
@@ -120,9 +117,7 @@ static int extract_param(const char **source, param_token *name, param_token *va
 		else if (*p)
 			/* garbage after closed quote, e.g. foo="bar"baz */
 			return 0;
-	}
-	else                          /* unquoted */
-	{
+	} else {                      /* unquoted */
 		value->b = p;
 		while (*p && *p != separator) ++p;
 		value->e = p;
@@ -135,8 +130,8 @@ static int extract_param(const char **source, param_token *name, param_token *va
 
 }
 
-char* digest_authentication_encode(const char *line, const char *user, const char *passwd, 
-		const char *method, const char *path, int count, const char *cnonce)
+char* digest_authentication_encode(const char *line, const char *user, const char *passwd,
+                                   const char *method, const char *path, int count, const char *cnonce)
 {
 	char *realm = NULL, *opaque = NULL, *nonce = NULL, *qop = NULL;
 	char nc[9];
@@ -148,20 +143,17 @@ char* digest_authentication_encode(const char *line, const char *user, const cha
 	while (extract_param(&ptr, &name, &value, ',')) {
 		int namelen = name.e - name.b;
 		int valuelen = value.e - value.b;
-		
+
 		if (strncasecmp(name.b, "realm" , namelen) == 0) {
 			strncpy(realm  = calloc(valuelen + 1, 1), value.b, valuelen);
 			realm[valuelen] = '\0';
-		}
-		else if (strncasecmp(name.b, "opaque", namelen) == 0) {
+		} else if (strncasecmp(name.b, "opaque", namelen) == 0) {
 			strncpy(opaque = calloc(valuelen + 1, 1), value.b, valuelen);
 			opaque[valuelen] = '\0';
-		}
-		else if (strncasecmp(name.b, "nonce" , namelen) == 0) {
+		} else if (strncasecmp(name.b, "nonce" , namelen) == 0) {
 			strncpy(nonce  = calloc(valuelen + 1, 1), value.b, valuelen);
 			nonce[valuelen] = '\0';
-		}
-		else if (strncasecmp(name.b, "qop"   , namelen) == 0) {
+		} else if (strncasecmp(name.b, "qop"   , namelen) == 0) {
 			strncpy(qop    = calloc(valuelen + 1, 1), value.b, valuelen);
 			qop[valuelen] = '\0';
 		}
@@ -247,11 +239,11 @@ char* digest_authentication_encode(const char *line, const char *user, const cha
 
 	char *res = (char*)malloc(len);
 	if (!qop) {
-		sprintf(res, "username=\"%s\", realm=\"%s\", nonce=\"%s\", uri=\"%s\", response=\"%s\"", 
-				user, realm, nonce, path, response);
+		sprintf(res, "username=\"%s\", realm=\"%s\", nonce=\"%s\", uri=\"%s\", response=\"%s\"",
+		        user, realm, nonce, path, response);
 	} else {
 		sprintf(res, "username=\"%s\", realm=\"%s\", nonce=\"%s\", uri=\"%s\", response=\"%s\", qop=%s, nc=%s, cnonce=\"%s\"",
-				user, realm, nonce, path, response, qop, nc, cnonce);
+		        user, realm, nonce, path, response, qop, nc, cnonce);
 	}
 
 	if (opaque) {

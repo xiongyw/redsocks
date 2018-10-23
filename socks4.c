@@ -79,15 +79,14 @@ static void socks4_read_cb(struct bufferevent *buffev, void *_arg)
 		if (reply.ver != 0) {
 			redsocks_log_error(client, LOG_NOTICE, "Socks4 server reported unexpected reply version...");
 			redsocks_drop_client(client);
-		}
-		else if (reply.status == socks4_status_ok)
+		} else if (reply.status == socks4_status_ok)
 			redsocks_start_relay(client);
 		else {
 			redsocks_log_error(client, LOG_NOTICE, "Socks4 server status: %s (%i)",
-				reply.status == socks4_status_fail ? "fail" :
-				reply.status == socks4_status_no_ident ? "no ident" :
-				reply.status == socks4_status_fake_ident ? "fake ident" : "?",
-				reply.status);
+			                   reply.status == socks4_status_fail ? "fail" :
+			                   reply.status == socks4_status_no_ident ? "no ident" :
+			                   reply.status == socks4_status_fake_ident ? "fake ident" : "?",
+			                   reply.status);
 			redsocks_drop_client(client);
 		}
 	}
@@ -121,18 +120,16 @@ static void socks4_write_cb(struct bufferevent *buffev, void *_arg)
 
 	if (client->state == socks4_new) {
 		redsocks_write_helper(
-			buffev, client,
-			socks4_mkconnect, socks4_request_sent, sizeof(socks4_reply)
-			);
-	}
-	else if (client->state >= socks4_request_sent) {
+		    buffev, client,
+		    socks4_mkconnect, socks4_request_sent, sizeof(socks4_reply)
+		);
+	} else if (client->state >= socks4_request_sent) {
 		bufferevent_disable(buffev, EV_WRITE);
 	}
 }
 
 
-relay_subsys socks4_subsys =
-{
+relay_subsys socks4_subsys = {
 	.name                 = "socks4",
 	.payload_len          = 0,
 	.instance_payload_len = 0,

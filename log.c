@@ -28,21 +28,30 @@ typedef void (*log_func)(const char *file, int line, const char *func, int prior
 static const char* getprioname(int priority)
 {
 	switch (priority) {
-		case LOG_EMERG:   return "emerg";
-		case LOG_ALERT:   return "alert";
-		case LOG_CRIT:    return "crit";
-		case LOG_ERR:     return "err";
-		case LOG_WARNING: return "warning";
-		case LOG_NOTICE:  return "notice";
-		case LOG_INFO:    return "info";
-		case LOG_DEBUG:   return "debug";
-		default:          return "?";
+	case LOG_EMERG:
+		return "emerg";
+	case LOG_ALERT:
+		return "alert";
+	case LOG_CRIT:
+		return "crit";
+	case LOG_ERR:
+		return "err";
+	case LOG_WARNING:
+		return "warning";
+	case LOG_NOTICE:
+		return "notice";
+	case LOG_INFO:
+		return "info";
+	case LOG_DEBUG:
+		return "debug";
+	default:
+		return "?";
 	}
 }
 
 static void fprint_timestamp(
-		FILE* fd,
-		const char *file, int line, const char *func, int priority, const char *message, const char *appendix)
+    FILE* fd,
+    const char *file, int line, const char *func, int priority, const char *message, const char *appendix)
 {
 	struct timeval tv = { };
 	gettimeofday(&tv, 0);
@@ -91,12 +100,12 @@ int log_preopen(const char *dst, bool log_debug, bool log_info)
 		log_mask |= LOG_MASK(LOG_INFO);
 	if (strcmp(dst, "stderr") == 0) {
 		log_msg_next = stderr_msg;
-	}
-	else if (strncmp(dst, syslog_prefix, strlen(syslog_prefix)) == 0) {
+	} else if (strncmp(dst, syslog_prefix, strlen(syslog_prefix)) == 0) {
 		const char *facility_name = dst + strlen(syslog_prefix);
 		int facility = -1;
 		struct {
-			char *name; int value;
+			char *name;
+			int value;
 		} *ptpl, tpl[] = {
 			{ "daemon", LOG_DAEMON },
 			{ "local0", LOG_LOCAL0 },
@@ -110,10 +119,10 @@ int log_preopen(const char *dst, bool log_debug, bool log_info)
 		};
 
 		FOREACH(ptpl, tpl)
-			if (strcmp(facility_name, ptpl->name) == 0) {
-				facility = ptpl->value;
-				break;
-			}
+		if (strcmp(facility_name, ptpl->name) == 0) {
+			facility = ptpl->value;
+			break;
+		}
 		if (facility == -1) {
 			log_error(LOG_ERR, "log_preopen(%s, ...): unknown syslog facility", dst);
 			return -1;
@@ -129,8 +138,7 @@ int log_preopen(const char *dst, bool log_debug, bool log_info)
 		setlogmask(log_mask);
 
 		log_msg_next = syslog_msg;
-	}
-	else if (strncmp(dst, file_prefix, strlen(file_prefix)) == 0) {
+	} else if (strncmp(dst, file_prefix, strlen(file_prefix)) == 0) {
 		const char *filename = dst + strlen(file_prefix);
 		if ((logfile = fopen(filename, "a")) == NULL) {
 			log_error(LOG_ERR, "log_preopen(%s, ...): %s", dst, strerror(errno));
@@ -138,8 +146,7 @@ int log_preopen(const char *dst, bool log_debug, bool log_info)
 		}
 		log_msg_next = logfile_msg;
 		/* TODO: add log rotation */
-	}
-	else {
+	} else {
 		log_error(LOG_ERR, "log_preopen(%s, ...): unknown destination", dst);
 		return -1;
 	}
@@ -154,7 +161,7 @@ void log_open()
 
 int log_level_enabled(int priority)
 {
-    return (log_mask & LOG_MASK(priority));
+	return (log_mask & LOG_MASK(priority));
 }
 
 void _log_vwrite(const char *file, int line, const char *func, int do_errno, int priority, const char *fmt, va_list ap)

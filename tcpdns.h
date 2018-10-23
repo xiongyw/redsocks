@@ -15,11 +15,11 @@ typedef struct tcpdns_instance_t {
 	tcpdns_config   config;
 	struct event *  listener;
 	list_head       requests;
-    // Data for DNS resolver status tracking/checking
-    int             udp1_delay_ms;
-    int             udp2_delay_ms;
-    int             tcp1_delay_ms;
-    int             tcp2_delay_ms;
+	// Data for DNS resolver status tracking/checking
+	int             udp1_delay_ms;
+	int             udp2_delay_ms;
+	int             tcp1_delay_ms;
+	int             tcp2_delay_ms;
 } tcpdns_instance;
 
 
@@ -35,19 +35,19 @@ typedef struct dns_header_t {
 
 
 typedef struct dns_request_t {
-    list_head           list;
-    tcpdns_instance *   instance;
-    short               state;
-    int                 flags;
-    struct bufferevent* resolver;
-    struct sockaddr_in  client_addr;
-    struct timeval      req_time; 
-    int *               delay;
-    size_t              data_len;
-    union {
-        char            raw[513]; // DNS request longer than 512 should go over TCP.
-        dns_header header;
-    } data;
+	list_head           list;
+	tcpdns_instance *   instance;
+	short               state;
+	int                 flags;
+	struct bufferevent* resolver;
+	struct sockaddr_in  client_addr;
+	struct timeval      req_time;
+	int *               delay;
+	size_t              data_len;
+	union {
+		char            raw[513]; // DNS request longer than 512 should go over TCP.
+		dns_header header;
+	} data;
 } dns_request;
 
 #endif /* TCPDNS_H */

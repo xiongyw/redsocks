@@ -185,8 +185,8 @@ static int redir_init_pf()
 }
 
 static int getdestaddr_pf(
-		int fd, const struct sockaddr_in *client, const struct sockaddr_in *bindaddr,
-		struct sockaddr_in *destaddr)
+    int fd, const struct sockaddr_in *client, const struct sockaddr_in *bindaddr,
+    struct sockaddr_in *destaddr)
 {
 	int pffd = instance.redirector->private;
 	struct pfioc_natlook nl;
@@ -208,8 +208,7 @@ static int getdestaddr_pf(
 			if (ioctl(pffd, DIOCNATLOOK, &nl) != 0) {
 				goto fail;
 			}
-		}
-		else {
+		} else {
 			goto fail;
 		}
 	}
@@ -227,7 +226,7 @@ fail:
 
 	errno = saved_errno;
 	log_errno(LOG_WARNING, "ioctl(DIOCNATLOOK {src=%s:%d, dst=%s:%d})",
-			  clientaddr_str, ntohs(nl.sport), bindaddr_str, ntohs(nl.dport));
+	          clientaddr_str, ntohs(nl.sport), bindaddr_str, ntohs(nl.dport));
 	return -1;
 }
 #endif
@@ -267,7 +266,9 @@ int getdestaddr(int fd, const struct sockaddr_in *client, const struct sockaddr_
 
 int apply_tcp_keepalive(int fd)
 {
-	struct { int level, option, value; } opt[] = {
+	struct {
+		int level, option, value;
+	} opt[] = {
 		{ SOL_SOCKET, SO_KEEPALIVE, 1 },
 #if defined(TCP_KEEPIDLE) && defined(TCP_KEEPCNT) && defined(TCP_KEEPINTVL)
 		{ IPPROTO_TCP, TCP_KEEPIDLE, instance.tcp_keepalive_time },
@@ -289,22 +290,21 @@ int apply_tcp_keepalive(int fd)
 
 int apply_reuseport(int fd)
 {
-    if (!instance.reuseport)
-        return 0;
+	if (!instance.reuseport)
+		return 0;
 
 #ifdef SO_REUSEPORT
-    int opt = 1;
-    int rc = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
-    if (rc == -1)
-        log_errno(LOG_ERR, "setsockopt");
-    return rc;
+	int opt = 1;
+	int rc = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
+	if (rc == -1)
+		log_errno(LOG_ERR, "setsockopt");
+	return rc;
 #else
-    return -1;
+	return -1;
 #endif
 }
 
-static redirector_subsys redirector_subsystems[] =
-{
+static redirector_subsys redirector_subsystems[] = {
 #ifdef __FreeBSD__
 	{ .name = "ipf", .init = redir_init_ipf, .fini = redir_close_private, .getdestaddr = getdestaddr_ipf },
 #endif
@@ -320,8 +320,7 @@ static redirector_subsys redirector_subsystems[] =
 /***********************************************************************
  * `base` config parsing
  */
-static parser_entry base_entries[] =
-{
+static parser_entry base_entries[] = {
 	{ .key = "chroot",     .type = pt_pchar,   .addr = &instance.chroot },
 	{ .key = "user",       .type = pt_pchar,   .addr = &instance.user },
 	{ .key = "group",      .type = pt_pchar,   .addr = &instance.group },
@@ -366,8 +365,7 @@ static int base_onexit(parser_section *section)
 		}
 		if (!instance.redirector)
 			err = "invalid `redirector` set";
-	}
-	else {
+	} else {
 		err = "no `redirector` set";
 	}
 
@@ -380,8 +378,7 @@ static int base_onexit(parser_section *section)
 	return err ? -1 : 0;
 }
 
-static parser_section base_conf_section =
-{
+static parser_section base_conf_section = {
 	.name    = "base",
 	.entries = base_entries,
 	.onenter = base_onenter,
@@ -426,10 +423,10 @@ static int base_init()
 	}
 
 	if (log_preopen(
-			instance.log_name ? instance.log_name : instance.daemon ? "syslog:daemon" : "stderr",
-			instance.log_debug,
-			instance.log_info
-	) < 0 ) {
+	        instance.log_name ? instance.log_name : instance.daemon ? "syslog:daemon" : "stderr",
+	        instance.log_debug,
+	        instance.log_info
+	    ) < 0 ) {
 		goto fail;
 	}
 
@@ -492,10 +489,10 @@ static int base_init()
 		int fds[] = { STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO };
 		int *pfd;
 		FOREACH(pfd, fds)
-			if (dup2(devnull, *pfd) < 0) {
-				log_errno(LOG_ERR, "dup2(devnull, %i)", *pfd);
-				goto fail;
-			}
+		if (dup2(devnull, *pfd) < 0) {
+			log_errno(LOG_ERR, "dup2(devnull, %i)", *pfd);
+			goto fail;
+		}
 
 		close(devnull);
 	}
@@ -525,8 +522,7 @@ static int base_fini()
 	return 0;
 }
 
-app_subsys base_subsys =
-{
+app_subsys g_base_subsys = {
 	.init = base_init,
 	.fini = base_fini,
 	.conf_section = &base_conf_section,

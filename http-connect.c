@@ -142,8 +142,7 @@ void httpc_read_cb(struct bufferevent *buffev, void *_arg)
 				}
 			}
 			free(line);
-		}
-		else if (len >= HTTP_HEAD_WM_HIGH) {
+		} else if (len >= HTTP_HEAD_WM_HIGH) {
 			redsocks_drop_client(client);
 			dropped = 1;
 		}
@@ -159,8 +158,7 @@ void httpc_read_cb(struct bufferevent *buffev, void *_arg)
 				client->state = httpc_headers_skipped;
 			}
 			free(line);
-		}
-		else {
+		} else {
 			break;
 		}
 	}
@@ -203,27 +201,27 @@ struct evbuffer *httpc_mkconnect(redsocks_client *client)
 			snprintf(cnounce, sizeof(cnounce), "%08x%08x", red_randui32(), red_randui32());
 
 			auth_string = digest_authentication_encode(auth->last_auth_query + 7, //line
-					client->instance->config.login, client->instance->config.password, //user, pass
-					"CONNECT", uri, auth->last_auth_count, cnounce); // method, path, nc, cnounce
+			              client->instance->config.login, client->instance->config.password, //user, pass
+			              "CONNECT", uri, auth->last_auth_count, cnounce); // method, path, nc, cnounce
 			auth_scheme = "Digest";
 		}
 	}
 
 	if (auth_string == NULL) {
 		len = evbuffer_add_printf(buff,
-			"CONNECT %s:%u HTTP/1.0\r\n\r\n",
-			inet_ntoa(client->destaddr.sin_addr),
-			ntohs(client->destaddr.sin_port)
-		);
+		                          "CONNECT %s:%u HTTP/1.0\r\n\r\n",
+		                          inet_ntoa(client->destaddr.sin_addr),
+		                          ntohs(client->destaddr.sin_port)
+		                         );
 	} else {
 		len = evbuffer_add_printf(buff,
-			"CONNECT %s:%u HTTP/1.0\r\n%s %s %s\r\n\r\n",
-			inet_ntoa(client->destaddr.sin_addr),
-			ntohs(client->destaddr.sin_port),
-			auth_response_header,
-			auth_scheme,
-			auth_string
-		);
+		                          "CONNECT %s:%u HTTP/1.0\r\n%s %s %s\r\n\r\n",
+		                          inet_ntoa(client->destaddr.sin_addr),
+		                          ntohs(client->destaddr.sin_port),
+		                          auth_response_header,
+		                          auth_scheme,
+		                          auth_string
+		                         );
 	}
 
 	free(auth_string);
@@ -251,18 +249,16 @@ void httpc_write_cb(struct bufferevent *buffev, void *_arg)
 
 	if (client->state == httpc_new) {
 		redsocks_write_helper_ex(
-			buffev, client,
-			httpc_mkconnect, httpc_request_sent, 1, HTTP_HEAD_WM_HIGH
-			);
-	}
-	else if (client->state >= httpc_request_sent) {
+		    buffev, client,
+		    httpc_mkconnect, httpc_request_sent, 1, HTTP_HEAD_WM_HIGH
+		);
+	} else if (client->state >= httpc_request_sent) {
 		bufferevent_disable(buffev, EV_WRITE);
 	}
 }
 
 
-relay_subsys http_connect_subsys =
-{
+relay_subsys http_connect_subsys = {
 	.name                 = "http-connect",
 	.payload_len          = 0,
 	.instance_payload_len = sizeof(http_auth),

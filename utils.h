@@ -58,36 +58,36 @@ uint32_t red_randui32();
 time_t redsocks_time(time_t *t);
 char *redsocks_evbuffer_readline(struct evbuffer *buf);
 struct bufferevent* red_prepare_relay(const char *ifname,
-                                bufferevent_data_cb readcb,
-                                bufferevent_data_cb writecb,
-                                bufferevent_event_cb errorcb,
-                                void *cbarg);
+                                      bufferevent_data_cb readcb,
+                                      bufferevent_data_cb writecb,
+                                      bufferevent_event_cb errorcb,
+                                      void *cbarg);
 struct bufferevent* red_connect_relay(const char *ifname,
-                                struct sockaddr_in *addr,
-                                bufferevent_data_cb readcb,
-                                bufferevent_data_cb writecb,
-                                bufferevent_event_cb errorcb,
-                                void *cbarg,
-                                const struct timeval *timeout_write);
+                                      struct sockaddr_in *addr,
+                                      bufferevent_data_cb readcb,
+                                      bufferevent_data_cb writecb,
+                                      bufferevent_event_cb errorcb,
+                                      void *cbarg,
+                                      const struct timeval *timeout_write);
 #if defined(ENABLE_HTTPS_PROXY)
 struct bufferevent* red_connect_relay_ssl(const char *ifname,
-                                struct sockaddr_in *addr,
-                                SSL * ssl,
-                                bufferevent_data_cb readcb,
-                                bufferevent_data_cb writecb,
-                                bufferevent_event_cb errorcb,
-                                void *cbarg,
-                                const struct timeval *timeout_write);
+        struct sockaddr_in *addr,
+        SSL * ssl,
+        bufferevent_data_cb readcb,
+        bufferevent_data_cb writecb,
+        bufferevent_event_cb errorcb,
+        void *cbarg,
+        const struct timeval *timeout_write);
 #endif
 struct bufferevent* red_connect_relay_tfo(const char *ifname,
-                                struct sockaddr_in *addr,
-                                bufferevent_data_cb readcb,
-                                bufferevent_data_cb writecb,
-                                bufferevent_event_cb errorcb,
-                                void *cbarg,
-                                const struct timeval *timeout_write,
-                                void *data,
-                                size_t *len);
+        struct sockaddr_in *addr,
+        bufferevent_data_cb readcb,
+        bufferevent_data_cb writecb,
+        bufferevent_event_cb errorcb,
+        void *cbarg,
+        const struct timeval *timeout_write,
+        void *data,
+        size_t *len);
 
 int red_socket_geterrno(struct bufferevent *buffev);
 int red_is_socket_connected_ok(struct bufferevent *buffev);

@@ -14,11 +14,13 @@ struct node {
 	int height;
 };
 
-static int delta(struct node *n) {
+static int delta(struct node *n)
+{
 	return (n->left ? n->left->height:0) - (n->right ? n->right->height:0);
 }
 
-static void updateheight(struct node *n) {
+static void updateheight(struct node *n)
+{
 	n->height = 0;
 	if (n->left && n->left->height > n->height)
 		n->height = n->left->height;
@@ -27,7 +29,8 @@ static void updateheight(struct node *n) {
 	n->height++;
 }
 
-static struct node *rotl(struct node *n) {
+static struct node *rotl(struct node *n)
+{
 	struct node *r = n->right;
 	n->right = r->left;
 	r->left = n;
@@ -36,7 +39,8 @@ static struct node *rotl(struct node *n) {
 	return r;
 }
 
-static struct node *rotr(struct node *n) {
+static struct node *rotr(struct node *n)
+{
 	struct node *l = n->left;
 	n->left = l->right;
 	l->right = n;
@@ -45,7 +49,8 @@ static struct node *rotr(struct node *n) {
 	return l;
 }
 
-static struct node *balance(struct node *n) {
+static struct node *balance(struct node *n)
+{
 	int d = delta(n);
 
 	if (d < -1) {
@@ -62,7 +67,7 @@ static struct node *balance(struct node *n) {
 }
 
 static struct node *find(struct node *n, const void *k,
-	int (*cmp)(const void *, const void *))
+                         int (*cmp)(const void *, const void *))
 {
 	int c;
 
@@ -78,7 +83,7 @@ static struct node *find(struct node *n, const void *k,
 }
 
 static struct node *insert(struct node *n, const void *k,
-	int (*cmp)(const void *, const void *), struct node **found)
+                           int (*cmp)(const void *, const void *), struct node **found)
 {
 	struct node *r;
 	int c;
@@ -120,7 +125,7 @@ static struct node *remove_rightmost(struct node *n, struct node **rightmost)
 }
 
 static struct node *remove(struct node **n, const void *k,
-	int (*cmp)(const void *, const void *), struct node *parent)
+                           int (*cmp)(const void *, const void *), struct node *parent)
 {
 	int c;
 
@@ -149,7 +154,7 @@ static struct node *remove(struct node **n, const void *k,
 }
 
 void *tdelete(const void *restrict key, void **restrict rootp,
-	int(*compar)(const void *, const void *))
+              int(*compar)(const void *, const void *))
 {
 	if (!rootp)
 		return 0;
@@ -163,7 +168,7 @@ void *tdelete(const void *restrict key, void **restrict rootp,
 }
 
 void *tfind(const void *key, void *const *rootp,
-	int(*compar)(const void *, const void *))
+            int(*compar)(const void *, const void *))
 {
 	if (!rootp)
 		return 0;
@@ -171,7 +176,7 @@ void *tfind(const void *key, void *const *rootp,
 }
 
 void *tsearch(const void *key, void **rootp,
-	int (*compar)(const void *, const void *))
+              int (*compar)(const void *, const void *))
 {
 	struct node *update;
 	struct node *ret;

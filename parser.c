@@ -56,8 +56,7 @@ void parser_error(parser_context *context, const char *fmt, ...)
 	if (buff) {
 		evbuffer_add_vprintf(buff, fmt, ap);
 		msg = (const char*)evbuffer_pullup(buff, -1);
-	}
-	else
+	} else
 		msg = "<Can't print error, not enough memory>";
 	va_end(ap);
 
@@ -98,15 +97,22 @@ void parser_stop(parser_context *context)
 static char unescape(int c)
 {
 	switch (c) {
-		case 'n': return '\n';
-		case 't': return '\t';
-		case 'r': return '\r';
+	case 'n':
+		return '\n';
+	case 't':
+		return '\t';
+	case 'r':
+		return '\r';
 
-		case '\\': return '\\';
-		case '\'': return '\'';
-		case '\"': return '\"';
+	case '\\':
+		return '\\';
+	case '\'':
+		return '\'';
+	case '\"':
+		return '\"';
 
-		default: return 0;
+	default:
+		return 0;
 	}
 }
 
@@ -145,16 +151,14 @@ static char *gettoken(parser_context *context, char **iter)
 						parser_error(context, "unknown escaped char after \\");
 						return NULL;
 					}
-				}
-				else {
+				} else {
 					return NULL;
 				}
 			}
 			len++;
 			p++;
 		}
-	}
-	else if ( isdigit(**iter) ) { // integer OR IP/NETMASK
+	} else if ( isdigit(**iter) ) { // integer OR IP/NETMASK
 		char *p = *iter;
 		copytype = gt_plainstr;
 		while ( 1 ) {
@@ -169,13 +173,11 @@ static char *gettoken(parser_context *context, char **iter)
 					break;
 				else
 					return NULL;
-			}
-			else
+			} else
 				break;
 		}
 		len = p - *iter;
-	}
-	else if ( isalpha(**iter) ) { // simple-string
+	} else if ( isalpha(**iter) ) { // simple-string
 		char *p = *iter;
 		copytype = gt_plainstr;
 		while ( 1 ) {
@@ -187,16 +189,13 @@ static char *gettoken(parser_context *context, char **iter)
 				break;
 		}
 		len = p - *iter;
-	}
-	else if ( **iter == '{' || **iter == '}' || **iter == '=' || **iter == ';' ) { // config punctuation
+	} else if ( **iter == '{' || **iter == '}' || **iter == '=' || **iter == ';' ) { // config punctuation
 		copytype = gt_plainstr;
 		len = 1;
-	}
-	else if ( **iter == '/' && ( (*iter)[1] == '/' || (*iter)[1] == '*' ) ) { // comment-start
+	} else if ( **iter == '/' && ( (*iter)[1] == '/' || (*iter)[1] == '*' ) ) { // comment-start
 		copytype = gt_plainstr;
 		len = 2;
-	}
-	else {
+	} else {
 		parser_error(context, "unexpected char");
 		return NULL;
 	}
@@ -218,16 +217,14 @@ static char *gettoken(parser_context *context, char **iter)
 			if (**iter == '\\') {
 				*p = unescape(*(*iter + 1));
 				(*iter)++;
-			}
-			else {
+			} else {
 				*p = **iter;
 			}
 			(*iter)++;
 			p++;
 		}
 		*p = 0;
-	}
-	else if (copytype == gt_plainstr) {
+	} else if (copytype == gt_plainstr) {
 		memcpy(ret, *iter, len);
 		*iter += len;
 		ret[len] = 0;
@@ -255,16 +252,16 @@ static int vp_pbool(parser_context *context, void *addr, const char *token)
 	char **tpl;
 
 	FOREACH(tpl, strtrue)
-		if (strcmp(token, *tpl) == 0) {
-			*(bool*)addr = true;
-			return 0;
-		}
+	if (strcmp(token, *tpl) == 0) {
+		*(bool*)addr = true;
+		return 0;
+	}
 
 	FOREACH(tpl, strfalse)
-		if (strcmp(token, *tpl) == 0) {
-			*(bool*)addr = false;
-			return 0;
-		}
+	if (strcmp(token, *tpl) == 0) {
+		*(bool*)addr = false;
+		return 0;
+	}
 
 	parser_error(context, "boolean is not parsed");
 	return -1;
@@ -319,8 +316,7 @@ static int vp_in_addr(parser_context *context, void *addr, const char *token)
 
 	if (inet_aton(token, &ia)) {
 		memcpy(addr, &ia, sizeof(ia));
-	}
-	else {
+	} else {
 		struct addrinfo *ainfo, hints;
 		int err;
 		memset(&hints, 0, sizeof(hints));
@@ -345,8 +341,7 @@ static int vp_in_addr(parser_context *context, void *addr, const char *token)
 				          token, count, inet_ntoa(resolved_addr->sin_addr));
 			memcpy(addr, &resolved_addr->sin_addr, sizeof(ia));
 			freeaddrinfo(ainfo);
-		}
-		else {
+		} else {
 			if (err == EAI_SYSTEM)
 				parser_error(context, "unable to resolve %s, error %d (%s)", token, errno, strerror(errno));
 			else
@@ -376,8 +371,7 @@ static int vp_in_addr2(parser_context *context, void *addr, const char *token)
 
 	if (inet_aton(host, &ia)) {
 		memcpy(addr, &ia, sizeof(ia));
-	}
-	else {
+	} else {
 		parser_error(context, "invalid IP address");
 		retval = -1;
 	}
@@ -389,16 +383,13 @@ static int vp_in_addr2(parser_context *context, void *addr, const char *token)
 		if (*end == '.') {
 			if (inet_aton(mask, &ia)) {
 				memcpy(pinmask , &ia, sizeof(ia));
-			}
-			else {
+			} else {
 				parser_error(context, "invalid IP address");
 				retval = -1;
 			}
-		}
-		else if (0 < uli && uli < 32) {
+		} else if (0 < uli && uli < 32) {
 			pinmask->s_addr = htonl((INADDR_BROADCAST << (32 - uli)));
-		}
-		else {
+		} else {
 			parser_error(context, "number of netmask bits out of range");
 			retval = -1;
 		}
@@ -408,8 +399,7 @@ static int vp_in_addr2(parser_context *context, void *addr, const char *token)
 	return retval;
 }
 
-static value_parser value_parser_by_type[] =
-{
+static value_parser value_parser_by_type[] = {
 	[pt_bool] = vp_pbool,
 	[pt_pchar] = vp_pchar,
 	[pt_uint16] = vp_uint16,
@@ -446,8 +436,7 @@ int parser_run(parser_context *context)
 				if (ferror(context->fd)) {
 					parser_error(context, "file read failure");
 					return -1;
-				}
-				else
+				} else
 					continue;
 			}
 			len = strlen(sbegin);
@@ -455,8 +444,7 @@ int parser_run(parser_context *context)
 			if (len > 0 && sbegin[len - 1] == '\n') {
 				context->line++;
 				need_more_data = false;
-			}
-			else {
+			} else {
 				need_more_space = true;
 				continue;
 			}
@@ -470,8 +458,7 @@ int parser_run(parser_context *context)
 				memmove(context->buffer.data, endc, context->buffer.filled - comment_len);
 				context_filled_add(context, -comment_len);
 				in_comment = false;
-			}
-			else {
+			} else {
 				context_filled_set(context, 0);
 				need_more_data = true;
 				continue;
@@ -488,22 +475,18 @@ int parser_run(parser_context *context)
 				int moved_len = context->buffer.filled - (endc - context->buffer.data);
 				memmove(iter, endc, moved_len);
 				context_filled_add(context, -(endc - iter));
-			}
-			else if (strcmp(token, "/*") == 0) {
+			} else if (strcmp(token, "/*") == 0) {
 				int moved_len = iter - context->buffer.data;
 				memmove(context->buffer.data, iter, context->buffer.filled - moved_len);
 				context_filled_add(context, -moved_len);
 				iter = context->buffer.data;
 				in_comment = true;
-			}
-			else if (strcmp(token, "{") == 0) { // } - I love folding
+			} else if (strcmp(token, "{") == 0) { // } - I love folding
 				if (section) {
 					parser_error(context, "section-in-section is invalid");
-				}
-				else if (!section_token) {
+				} else if (!section_token) {
 					parser_error(context, "expected token before ``{''"); // } - I love folding
-				}
-				else {
+				} else {
 					for (parser_section *p = context->sections; p; p = p->next) {
 						if (strcmp(p->name, section_token) == 0) {
 							section = p;
@@ -514,43 +497,34 @@ int parser_run(parser_context *context)
 						if (section->onenter)
 							if ( section->onenter(section) == -1 )
 								parser_error(context, "section->onenter failed");
-					}
-					else {
+					} else {
 						parser_error(context, "unknown section <%s>", section_token);
 					}
 					FREE(section_token);
 				}
-			}
-			else if (strcmp(token, "}") == 0) { // { - I love folding
+			} else if (strcmp(token, "}") == 0) { // { - I love folding
 				if (section) {
 					if (section->onexit)
 						if ( section->onexit(section) == -1 )
 							parser_error(context, "section->onexit failed");
 					section = NULL;
-				}
-				else {
+				} else {
 					parser_error(context, "can't close non-opened section");
 				}
-			}
-			else if (strcmp(token, "=") == 0) {
+			} else if (strcmp(token, "=") == 0) {
 				if (!section) {
 					parser_error(context, "assignment used outside of any section");
-				}
-				else if (!key_token) {
+				} else if (!key_token) {
 					parser_error(context, "assignment used without key");
-				}
-				else {
+				} else {
 					; // What can I do? :)
 				}
-			}
-			else if (strcmp(token, ";") == 0) {
+			} else if (strcmp(token, ";") == 0) {
 				if (!section) {
 					parser_error(context, "assignment termination outside of any section");
-				}
-				else if (key_token && !value_token) {
+				} else if (key_token && !value_token) {
 					parser_error(context, "assignment has only key but no value");
-				}
-				else if (key_token && value_token) {
+				} else if (key_token && value_token) {
 					parser_entry *e;
 					for (e = section->entries; e->key; e++)
 						if (strcmp(e->key, key_token) == 0)
@@ -558,31 +532,25 @@ int parser_run(parser_context *context)
 					if (e->key) {
 						if ( (value_parser_by_type[e->type])(context, e->addr, value_token) == -1 )
 							parser_error(context, "value can't be parsed");
-					}
-					else {
+					} else {
 						parser_error(context, "assignment with unknown key <%s>", key_token);
 					}
-				}
-				else {
+				} else {
 					assert(false);
 				}
 				FREE(key_token);
 				FREE(value_token);
-			}
-			else {
+			} else {
 				if (!section && !section_token) {
 					section_token = token;
 					token = 0;
-				}
-				else if (section && !key_token) {
+				} else if (section && !key_token) {
 					key_token = token;
 					token = 0;
-				}
-				else if (section && key_token && !value_token) {
+				} else if (section && key_token && !value_token) {
 					value_token = token;
 					token = 0;
-				}
-				else {
+				} else {
 					parser_error(context, "invalid token order");
 				}
 			}

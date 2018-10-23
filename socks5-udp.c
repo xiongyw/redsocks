@@ -94,18 +94,18 @@ static void socks5_client_fini(redudp_client *client)
 			redudp_log_errno(client, LOG_ERR, "event_del");
 		close(fd);
 	}
-    if (socks5client->relay) {
-        fd = bufferevent_getfd(socks5client->relay);
-        bufferevent_free(socks5client->relay);
-        shutdown(fd, SHUT_RDWR);
-        close(fd);
-    }
+	if (socks5client->relay) {
+		fd = bufferevent_getfd(socks5client->relay);
+		bufferevent_free(socks5client->relay);
+		shutdown(fd, SHUT_RDWR);
+		close(fd);
+	}
 }
 
 static int socks5_ready_to_fwd(struct redudp_client_t *client)
 {
 	socks5_client *socks5client = (void*)(client + 1);
-	return socks5client->ready_fwd; 
+	return socks5client->ready_fwd;
 }
 
 static void socks5_forward_pkt(redudp_client *client, struct sockaddr *destaddr, void *buf, size_t pktlen)
@@ -133,8 +133,7 @@ static void socks5_forward_pkt(redudp_client *client, struct sockaddr *destaddr,
 	if (outgoing == -1) {
 		redudp_log_errno(client, LOG_WARNING, "sendmsg: Can't forward packet, dropping it");
 		return;
-	}
-	else if (outgoing != fwdlen) {
+	} else if (outgoing != fwdlen) {
 		redudp_log_error(client, LOG_WARNING, "sendmsg: I was sending %zd bytes, but only %zd were sent.", fwdlen, outgoing);
 		return;
 	}
@@ -211,7 +210,7 @@ static void socks5_read_assoc_reply(struct bufferevent *buffev, void *_arg)
 
 	if (reply.h.status != socks5_status_succeeded) {
 		redudp_log_error(client, LOG_NOTICE, "Socks5 server status: \"%s\" (%i)",
-				socks5_status_to_str(reply.h.status), reply.h.status);
+		                 socks5_status_to_str(reply.h.status), reply.h.status);
 		goto fail;
 	}
 
@@ -231,11 +230,11 @@ static void socks5_read_assoc_reply(struct bufferevent *buffev, void *_arg)
 		goto fail;
 	}
 
-    error = evutil_make_socket_nonblocking(fd);
-    if (error) {
-        redudp_log_errno(client, LOG_ERR, "evutil_make_socket_nonblocking");
-        goto fail;
-    }
+	error = evutil_make_socket_nonblocking(fd);
+	if (error) {
+		redudp_log_errno(client, LOG_ERR, "evutil_make_socket_nonblocking");
+		goto fail;
+	}
 
 
 	error = connect(fd, (struct sockaddr*)&socks5client->udprelayaddr, sizeof(socks5client->udprelayaddr));
@@ -285,8 +284,8 @@ static void socks5_read_auth_reply(struct bufferevent *buffev, void *_arg)
 	}
 
 	error = redsocks_write_helper_ex_plain(
-			socks5client->relay, NULL, socks5_mkassociate, NULL, 0, /* last two are ignored */
-			sizeof(socks5_expected_assoc_reply), sizeof(socks5_expected_assoc_reply));
+	            socks5client->relay, NULL, socks5_mkassociate, NULL, 0, /* last two are ignored */
+	            sizeof(socks5_expected_assoc_reply), sizeof(socks5_expected_assoc_reply));
 	if (error)
 		goto fail;
 
@@ -319,20 +318,18 @@ static void socks5_read_auth_methods(struct bufferevent *buffev, void *_arg)
 	if (error) {
 		redudp_log_error(client, LOG_NOTICE, "socks5_is_known_auth_method: %s", error);
 		goto fail;
-	}
-	else if (reply.method == socks5_auth_none) {
+	} else if (reply.method == socks5_auth_none) {
 		ierror = redsocks_write_helper_ex_plain(
-				socks5client->relay, NULL, socks5_mkassociate, NULL, 0, /* last two are ignored */
-				sizeof(socks5_expected_assoc_reply), sizeof(socks5_expected_assoc_reply));
+		             socks5client->relay, NULL, socks5_mkassociate, NULL, 0, /* last two are ignored */
+		             sizeof(socks5_expected_assoc_reply), sizeof(socks5_expected_assoc_reply));
 		if (ierror)
 			goto fail;
 
 		replace_readcb(socks5client->relay, socks5_read_assoc_reply);
-	}
-	else if (reply.method == socks5_auth_password) {
+	} else if (reply.method == socks5_auth_password) {
 		ierror = redsocks_write_helper_ex_plain(
-				socks5client->relay, NULL, socks5_mkpassword_plain_wrapper, client->instance, 0, /* last one is ignored */
-				sizeof(socks5_auth_reply), sizeof(socks5_auth_reply));
+		             socks5client->relay, NULL, socks5_mkpassword_plain_wrapper, client->instance, 0, /* last one is ignored */
+		             sizeof(socks5_auth_reply), sizeof(socks5_auth_reply));
 		if (ierror)
 			goto fail;
 
@@ -360,8 +357,8 @@ static void socks5_relay_connected(struct bufferevent *buffev, void *_arg)
 	}
 
 	error = redsocks_write_helper_ex_plain(
-			socks5client->relay, NULL, socks5_mkmethods_plain_wrapper, &do_password, 0 /* does not matter */,
-			sizeof(socks5_method_reply), sizeof(socks5_method_reply));
+	            socks5client->relay, NULL, socks5_mkmethods_plain_wrapper, &do_password, 0 /* does not matter */,
+	            sizeof(socks5_method_reply), sizeof(socks5_method_reply));
 	if (error)
 		goto fail;
 
@@ -386,23 +383,22 @@ static void socks5_relay_error(struct bufferevent *buffev, short what, void *_ar
 static void socks5_connect_relay(redudp_client *client)
 {
 	socks5_client *socks5client = (void*)(client + 1);
-	socks5client->relay = red_connect_relay(NULL, &client->instance->config.relayaddr, NULL, 
-	                                  socks5_relay_connected, socks5_relay_error, client, NULL);
+	socks5client->relay = red_connect_relay(NULL, &client->instance->config.relayaddr, NULL,
+	                                        socks5_relay_connected, socks5_relay_error, client, NULL);
 	if (!socks5client->relay)
 		redudp_drop_client(client);
 }
 
 static int socks5_instance_init(struct redudp_instance_t *instance)
 {
-    return 0;
+	return 0;
 }
 
 static void socks5_instance_fini(struct redudp_instance_t *instance)
 {
 }
 
-udprelay_subsys socks5_udp_subsys =
-{
+udprelay_subsys socks5_udp_subsys = {
 	.name                 = "socks5",
 	.payload_len          = sizeof(socks5_client),
 	.instance_payload_len = 0,

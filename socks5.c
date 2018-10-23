@@ -55,8 +55,7 @@ const char* socks5_status_to_str(int socks5_status)
 {
 	if (0 <= socks5_status && socks5_status < socks5_strstatus_len) {
 		return socks5_strstatus[socks5_status];
-	}
-	else {
+	} else {
 		return "";
 	}
 }
@@ -95,7 +94,7 @@ struct evbuffer *socks5_mkmethods_plain(int do_password)
 {
 	assert(do_password == 0 || do_password == 1);
 	int len = sizeof(socks5_method_req) + do_password;
-    socks5_method_req *req = calloc(1, len);
+	socks5_method_req *req = calloc(1, len);
 
 	req->ver = socks5_ver;
 	req->num_methods = 1 + do_password;
@@ -159,9 +158,9 @@ static void socks5_write_cb(struct bufferevent *buffev, void *_arg)
 
 	if (client->state == socks5_new) {
 		redsocks_write_helper(
-			buffev, client,
-			socks5_mkmethods, socks5_method_sent, sizeof(socks5_method_reply)
-			);
+		    buffev, client,
+		    socks5_mkmethods, socks5_method_sent, sizeof(socks5_method_reply)
+		);
 	}
 }
 
@@ -189,18 +188,16 @@ static void socks5_read_auth_methods(struct bufferevent *buffev, redsocks_client
 	if (error) {
 		redsocks_log_error(client, LOG_NOTICE, "socks5_is_known_auth_method: %s", error);
 		redsocks_drop_client(client);
-	}
-	else if (reply.method == socks5_auth_none) {
+	} else if (reply.method == socks5_auth_none) {
 		redsocks_write_helper(
-			buffev, client,
-			socks5_mkconnect, socks5_request_sent, sizeof(socks5_reply)
-			);
-	}
-	else if (reply.method == socks5_auth_password) {
+		    buffev, client,
+		    socks5_mkconnect, socks5_request_sent, sizeof(socks5_reply)
+		);
+	} else if (reply.method == socks5_auth_password) {
 		redsocks_write_helper(
-			buffev, client,
-			socks5_mkpassword, socks5_auth_sent, sizeof(socks5_auth_reply)
-			);
+		    buffev, client,
+		    socks5_mkpassword, socks5_auth_sent, sizeof(socks5_auth_reply)
+		);
 	}
 }
 
@@ -214,12 +211,11 @@ static void socks5_read_auth_reply(struct bufferevent *buffev, redsocks_client *
 	if (reply.ver != socks5_password_ver) {
 		redsocks_log_error(client, LOG_NOTICE, "Socks5 server reported unexpected auth reply version...");
 		redsocks_drop_client(client);
-	}
-	else if (reply.status == socks5_password_passed)
+	} else if (reply.status == socks5_password_passed)
 		redsocks_write_helper(
-			buffev, client,
-			socks5_mkconnect, socks5_request_sent, sizeof(socks5_reply)
-			);
+		    buffev, client,
+		    socks5_mkconnect, socks5_request_sent, sizeof(socks5_reply)
+		);
 	else
 		redsocks_drop_client(client);
 }
@@ -234,39 +230,34 @@ static void socks5_read_reply(struct bufferevent *buffev, redsocks_client *clien
 	if (reply.ver != socks5_ver) {
 		redsocks_log_error(client, LOG_NOTICE, "Socks5 server reported unexpected reply version...");
 		redsocks_drop_client(client);
-	}
-	else if (reply.status == socks5_status_succeeded) {
+	} else if (reply.status == socks5_status_succeeded) {
 		socks5_state nextstate;
 		size_t len;
 
 		if (reply.addrtype == socks5_addrtype_ipv4) {
 			len = socks5->to_skip = sizeof(socks5_addr_ipv4);
 			nextstate = socks5_skip_address;
-		}
-		else if (reply.addrtype == socks5_addrtype_ipv6) {
+		} else if (reply.addrtype == socks5_addrtype_ipv6) {
 			len = socks5->to_skip = sizeof(socks5_addr_ipv6);
 			nextstate = socks5_skip_address;
-		}
-		else if (reply.addrtype == socks5_addrtype_domain) {
+		} else if (reply.addrtype == socks5_addrtype_domain) {
 			socks5_addr_domain domain;
 			len = sizeof(domain.size);
 			nextstate = socks5_skip_domain;
-		}
-		else {
+		} else {
 			redsocks_log_error(client, LOG_NOTICE, "Socks5 server reported unexpected address type...");
 			redsocks_drop_client(client);
 			return;
 		}
 
 		redsocks_write_helper(
-			buffev, client,
-			NULL, nextstate, len
-			);
-	}
-	else {
+		    buffev, client,
+		    NULL, nextstate, len
+		);
+	} else {
 		redsocks_log_error(client, LOG_NOTICE, "Socks5 server status: %s (%i)",
-				/* 0 <= reply.status && */ reply.status < SIZEOF_ARRAY(socks5_strstatus)
-				? socks5_strstatus[reply.status] : "?", reply.status);
+		                   /* 0 <= reply.status && */ reply.status < SIZEOF_ARRAY(socks5_strstatus)
+		                   ? socks5_strstatus[reply.status] : "?", reply.status);
 		redsocks_drop_client(client);
 	}
 }
@@ -280,37 +271,31 @@ static void socks5_read_cb(struct bufferevent *buffev, void *_arg)
 
 	if (client->state == socks5_method_sent) {
 		socks5_read_auth_methods(buffev, client, socks5);
-	}
-	else if (client->state == socks5_auth_sent) {
+	} else if (client->state == socks5_auth_sent) {
 		socks5_read_auth_reply(buffev, client, socks5);
-	}
-	else if (client->state == socks5_request_sent) {
+	} else if (client->state == socks5_request_sent) {
 		socks5_read_reply(buffev, client, socks5);
-	}
-	else if (client->state == socks5_skip_domain) {
+	} else if (client->state == socks5_skip_domain) {
 		socks5_addr_ipv4 ipv4; // all socks5_addr*.port are equal
 		uint8_t size;
 		if (redsocks_read_expected(client, bufferevent_get_input(buffev), &size, sizes_greater_equal, sizeof(size)) < 0)
 			return;
 		socks5->to_skip = size + sizeof(ipv4.port);
 		redsocks_write_helper(
-			buffev, client,
-			NULL, socks5_skip_address, socks5->to_skip
-			);
-	}
-	else if (client->state == socks5_skip_address) {
+		    buffev, client,
+		    NULL, socks5_skip_address, socks5->to_skip
+		);
+	} else if (client->state == socks5_skip_address) {
 		uint8_t data[socks5->to_skip];
 		if (redsocks_read_expected(client, bufferevent_get_input(buffev), data, sizes_greater_equal, socks5->to_skip) < 0)
 			return;
 		redsocks_start_relay(client);
-	}
-	else {
+	} else {
 		redsocks_drop_client(client);
 	}
 }
 
-relay_subsys socks5_subsys =
-{
+relay_subsys socks5_subsys = {
 	.name                 = "socks5",
 	.payload_len          = sizeof(socks5_client),
 	.instance_payload_len = 0,
